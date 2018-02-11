@@ -1,0 +1,47 @@
+{
+	"name": "vscode-auto-attach",
+	"displayName": "vscode-auto-attach",
+	"description": "Automatically attach to node process in debug mode",
+	"version": "0.0.1",
+	"publisher": "ms-vscode",
+	"author": {
+		"name": "Microsoft Corporation",
+		"email": "aweinand@microsoft.com"
+	},
+	"license": "MIT",
+	"categories": [
+		"Debuggers"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/Microsoft/vscode-auto-attach.git"
+	},
+	"bugs": {
+		"url": "https://github.com/Microsoft/vscode-auto-attach/issues"
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"postinstall": "node ./node_modules/vscode/bin/install",
+		"test": "npm run compile && node ./node_modules/vscode/bin/test",
+		"package": "vsce package"
+	},
+	"main": "./out/extension",
+	"engines": {
+		"vscode": "^1.20.0"
+	},
+	"dependencies": {
+		"vscode-nls": "3.2.1"
+	},
+	"devDependencies": {
+		"typescript": "^2.7.1",
+		"vscode": "^1.1.10",
+		"@types/node": "^7.0.43",
+		"@types/mocha": "^2.2.42",
+		"vsce": "^1.36.2"
+	},
+	"activationEvents": [
+		"*"
+	]
+}
