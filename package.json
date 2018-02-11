@@ -3,7 +3,7 @@
 	"displayName": "vscode-auto-attach",
 	"description": "Automatically attach to node process in debug mode",
 	"version": "0.0.1",
-	"publisher": "ms-vscode",
+	"publisher": "andreweinand",
 	"author": {
 		"name": "Microsoft Corporation",
 		"email": "aweinand@microsoft.com"

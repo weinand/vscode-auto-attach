@@ -1,8 +1,6 @@
 # VS Code Auto Attach
 
-The VS Code Auto Attach extensions shows all child processes of VS Code in a custom view in the VS Code Explorer.
-
-From the context menu of a process node you can terminate the process or attach a debugger to it.
+The VS Code Auto Attach extension automatically attaches the Node.js debugger to node.js programs launched from VS Code's integrated terminal.
 
 ## Installing VS Code Auto Attach
 
@@ -19,3 +17,4 @@ Then use VS Code's **Install from VSIX...** command to install the extension.
 
 ## Using VS Code Auto Attach
 
+Run a node program in debug mode from VS Code's integrated terminal and this exxtension will automatically attach VS Code's node debugger to it.
