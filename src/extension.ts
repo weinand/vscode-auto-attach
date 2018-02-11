@@ -6,14 +6,8 @@
 'use strict';
 
 import * as vscode from 'vscode';
+import * as cp from 'child_process';
 import * as nls from 'vscode-nls';
-import { exec } from 'child_process';
-
-
-const POLL_INTERVAL = 1000;
-
-const DEBUG_PORT_PATTERN = /\s--(inspect|debug)-port=(\d+)/;
-const DEBUG_FLAGS_PATTERN = /\s--(inspect|debug)(-brk)?(=(\d+))?/;
 
 const localize = nls.loadMessageBundle();
 
@@ -24,6 +18,12 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 }
 
+//---- Node.js Auto Attach
+
+const POLL_INTERVAL = 1000;
+
+const DEBUG_PORT_PATTERN = /\s--(inspect|debug)-port=(\d+)/;
+const DEBUG_FLAGS_PATTERN = /\s--(inspect|debug)(-brk)?(=(\d+))?/;
 
 function startAutoAttach() {
 
@@ -40,8 +40,7 @@ function startAutoAttach() {
 	pollChildProcesses(rootPid, (pid, cmd) => {
 		if (!pids.has(pid)) {
 			pids.add(pid);
-			if (cmd.indexOf('--type=extensionHost') < 0 && cmd.indexOf('--node-ipc') < 0) {
-				console.log(cmd);
+			if (cmd.indexOf('node ') >= 0) {
 				attachChildProcess(pid, cmd, defaultLaunchConfig);
 			}
 		}
@@ -49,7 +48,7 @@ function startAutoAttach() {
 }
 
 /**
- * Poll for processes in debug mode
+ * Poll for all subprocesses of given root process.
  */
 function pollChildProcesses(rootPid: number, processFoundCallback: (pid: number, cmd: string) => void) {
 	setInterval(() => {
@@ -57,6 +56,9 @@ function pollChildProcesses(rootPid: number, processFoundCallback: (pid: number,
 	}, POLL_INTERVAL);
 }
 
+/**
+ * Attach debugger to given process.
+ */
 function attachChildProcess(pid: number, cmd: string, baseConfig: vscode.DebugConfiguration) {
 
 	const config: vscode.DebugConfiguration = {
@@ -116,7 +118,10 @@ function attachChildProcess(pid: number, cmd: string, baseConfig: vscode.DebugCo
 	vscode.debug.startDebugging(undefined, config);
 }
 
-function findChildProcesses(rootPid: number, cb: (pid: number, cmd: string) => void) {
+/**
+ * Find all subprocesses of the given root process
+ */
+function findChildProcesses(rootPid: number, processFoundCallback: (pid: number, cmd: string) => void) {
 
 	const set = new Set<number>();
 
@@ -140,7 +145,7 @@ function findChildProcesses(rootPid: number, cb: (pid: number, cmd: string) => v
 			const matches = DEBUG_PORT_PATTERN.exec(cmd);
 			const matches2 = DEBUG_FLAGS_PATTERN.exec(cmd);
 			if ((matches && matches.length >= 3) || (matches2 && matches2.length >= 5)) {
-				cb(pid, cmd);
+				processFoundCallback(pid, cmd);
 			}
 		}
 	}
@@ -150,7 +155,7 @@ function findChildProcesses(rootPid: number, cb: (pid: number, cmd: string) => v
 		const CMD = 'wmic process get CommandLine,ParentProcessId,ProcessId';
 		const CMD_PAT = /^(.+)\s+([0-9]+)\s+([0-9]+)$/;
 
-		exec(CMD, { maxBuffer: 1000 * 1024 }, (err, stdout, stderr) => {
+		cp.exec(CMD, { maxBuffer: 1000 * 1024 }, (err, stdout, stderr) => {
 			if (!err && !stderr) {
 				const lines = stdout.split('\r\n');
 				for (let line of lines) {
@@ -166,7 +171,7 @@ function findChildProcesses(rootPid: number, cb: (pid: number, cmd: string) => v
 		const CMD = 'ps -ax -o pid=,ppid=,command=';
 		const CMD_PAT = /^\s*([0-9]+)\s+([0-9]+)\s+(.+)$/;
 
-		exec(CMD, { maxBuffer: 1000 * 1024 }, (err, stdout, stderr) => {
+		cp.exec(CMD, { maxBuffer: 1000 * 1024 }, (err, stdout, stderr) => {
 			if (!err && !stderr) {
 				const lines = stdout.toString().split('\n');
 				for (const line of lines) {
